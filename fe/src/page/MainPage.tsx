@@ -1,17 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useStore } from "@store/useStore";
+import toast, { Toaster } from "react-hot-toast"; // ✅ 1. 토스트 라이브러리 불러오기
 
-// 컴포넌트들 (너 경로 맞게 수정)
+// 컴포넌트들 (경로 맞게 수정)
 import NavBar from "@components/NavBar";
 import FooterBar from "@components/FooterBar";
 import StepOne from "@step/StepOne";
 import StepTwo from "@step/StepTwo";
-// import StepOne from "@/pages/steps/StepOne";
-// import StepTwo from "@/pages/steps/StepTwo";
-// import StepThree from "@/pages/steps/StepThree";
-// import StepFour from "@/pages/steps/StepFour";
-// import StepFive from "@/pages/steps/StepFive";
-// import StepResult from "@/pages/steps/StepResult";
+import StepThree from "@step/StepThree";
 
 export default function MainPage() {
   const navigate = useNavigate();
@@ -30,40 +27,46 @@ export default function MainPage() {
 
   // 🔥 next
   const nextStep = () => {
-    setDirection("right");
+    const state = useStore.getState();
 
-    // 👉 Vuex → 나중에 Zustand로 바꿔야됨
-    const canNext = true; // 임시
-
-    if (step === 0 && !canNext) {
-      alert("액자를 골라주세요.");
-      return;
-    } else if (step === 1 && !canNext) {
-      alert("사진이 부족합니다.");
-      return;
-    } else if (step === 2 && !canNext) {
-      alert("사진을 모두 골라주세요.");
+    // ✅ 2. alert() 대신 toast.error()를 사용해 에러 메시지를 띄웁니다!
+    // 1단계 검증
+    if (step === 0 && !state.frame) {
+      toast.error("액자를 골라주세요.");
       return;
     }
 
-    if (step === 5 || !canNext) return;
+    // 2단계 검증
+    if (step === 1 && Object.keys(state.images).length < 6) {
+      toast.error("사진 6장을 모두 찍거나 업로드해주세요.");
+      return;
+    }
 
+    // 3단계 검증
+    if (step === 2) {
+      const totalSlots = state.table.rows * state.table.columns;
+      if (Object.keys(state.targets).length < totalSlots) {
+        toast.error("사진을 빈칸 없이 모두 골라주세요.");
+        return;
+      }
+    }
+
+    if (step === 5) return;
+
+    setDirection("right");
     setStep((prev) => prev + 1);
   };
 
   // 🔥 prev
   const previousStep = () => {
     setDirection("left");
-
     if (step === 0) {
       navigate("/");
       return;
     }
-
     setStep((prev) => prev - 1);
   };
 
-  // 🔥 step 렌더링
   const renderStep = () => {
     const baseClass =
       "w-full animate-slide " +
@@ -74,19 +77,26 @@ export default function MainPage() {
         return <StepOne className={baseClass} />;
       case 1:
         return <StepTwo className={baseClass} />;
-      // case 2:
-      //   return <StepThree className={baseClass} />;
-      // case 3:
-      //   return <StepFour className={baseClass} />;
-      // case 4:
-      //   return <StepFive className={baseClass} />;
-      // default:
-      //   return <StepResult className={baseClass} onPrevious={previousStep} />;
+      case 2:
+        return <StepThree className={baseClass} />;
     }
   };
 
   return (
-    <div className="h-screen flex flex-col bg-white">
+    <div className="h-screen flex flex-col bg-white relative">
+      {/* ✅ 3. Toaster 컴포넌트를 최상단에 둡니다. (여기서 토스트 UI가 그려집니다) */}
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 2000, // 2초 뒤에 사라짐
+          style: {
+            background: "#333",
+            color: "#fff",
+            fontWeight: "bold",
+          },
+        }}
+      />
+
       {/* NAV */}
       <div className="fixed top-0 w-full z-[1000] bg-white">
         <NavBar
@@ -98,7 +108,7 @@ export default function MainPage() {
       </div>
 
       {/* CONTENT */}
-      <div className="flex-1 mt-[100px] overflow-y-auto">
+      <div className="flex-1 mt-[100px] overflow-y-auto overflow-x-hidden">
         <div className="container mx-auto px-4">{renderStep()}</div>
       </div>
 

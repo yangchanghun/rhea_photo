@@ -1,16 +1,17 @@
+import { useStore } from "@store/useStore";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Home() {
   const navigate = useNavigate();
-
+  const { resetState } = useStore();
   const init = () => {
     // Vuex → (Redux/Zustand 등으로 바꿔야 함)
     // 일단 예시로 localStorage 초기화
-    localStorage.clear();
+    // localStorage.clear();
 
     // 👉 만약 Zustand면
-    // useStore.getState().resetState();
+    resetState();
   };
 
   // mounted → useEffect

@@ -10,46 +10,41 @@ interface Props {
 export default function StepOne({ className }: Props) {
   const { frame, setFrame, setNext, setTable, resetState } = useStore();
 
-  const [targetFrame, setTargetFrame] = useState<string | null>(null);
+  // ✅ 초기값을 전역 스토어의 frame으로 바로 설정
+  const [targetFrame, setTargetFrame] = useState<string | null>(frame);
 
   const selectFrame = (id: string) => {
     if (targetFrame === id) {
       setTargetFrame(null);
+      setFrame(null); // 🔥 전역 스토어 즉시 업데이트 (빈 값)
       setNext(false);
-
       setTable({ rows: 2, columns: 1 });
     } else {
       setTargetFrame(id);
+      setFrame(id); // 🔥 전역 스토어 즉시 업데이트 (선택한 액자)
       setNext(true);
 
       const [columns, rows] = id.split("x").map(Number);
-
       setTable({ columns, rows });
     }
   };
+
   // ✅ mounted
   useEffect(() => {
-    resetState();
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setTargetFrame(frame);
-
-    if (!frame) setNext(false);
-    else setNext(true);
+    // 🔥 이미 액자를 골라둔 상태(뒤로가기 등)라면 전체 리셋을 막습니다.
+    if (!frame) {
+      resetState();
+      setNext(false);
+    } else {
+      setNext(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ✅ beforeDestroy
-  useEffect(() => {
-    return () => {
-      if (!targetFrame) return;
-      setFrame(targetFrame);
-    };
-  }, [targetFrame]);
-
-  // ✅ 선택
+  // 🗑️ 문제의 원인이었던 beforeDestroy(언마운트) useEffect는 완전히 삭제했습니다!
 
   return (
-    <div className={`text-center pb-12 ${className}`}>
+    <div className={`text-center pb-12 ${className || ""}`}>
       {/* 선택 상태 */}
       <div className="mb-6 bg-gray-500 text-white rounded-lg px-6 py-3 inline-block text-xl">
         프레임: {targetFrame ?? "선택 안함"}

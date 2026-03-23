@@ -10,12 +10,33 @@ interface Props {
 }
 
 export default function StepTwo({ className }: Props) {
-  // ✅ useState 대신 useStore에서 frame과 설정할 액션들 가져오기
-  const { frame } = useStore();
+  // ✅ setNext와 전역 setImages(이름 충돌 방지용 alias) 가져오기
+  const { frame, setNext, setImages: setGlobalImages } = useStore();
 
   const [images, setImages] = useState<Record<string, string>>({});
   const [canPhoto, setCanPhoto] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // ✅ [추가됨] 마운트 시 무조건 '다음' 버튼 비활성화
+  useEffect(() => {
+    setNext(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ✅ [추가됨] 이미지가 추가/삭제될 때마다 스토어 동기화 & 다음 버튼 제어 (Vue의 watch 대체)
+  useEffect(() => {
+    const imageCount = Object.keys(images).length;
+
+    // 1. 찍은 사진들을 Step3에서 쓸 수 있게 전역 스토어에 저장
+    setGlobalImages(images);
+
+    // 2. 6장이 꽉 찼을 때만 Next 버튼 활성화!
+    if (imageCount === 6) {
+      setNext(true);
+    } else {
+      setNext(false);
+    }
+  }, [images, setGlobalImages, setNext]);
 
   useEffect(() => {
     navigator.mediaDevices
@@ -70,8 +91,8 @@ export default function StepTwo({ className }: Props) {
   };
 
   return (
-    // ✅ 전달받은 className을 기존 클래스와 병합
     <div className={`step-two ${className || ""}`}>
+      {/* 스타일 생략 (기존과 동일) */}
       <style>{`
         .mirror { transform: scaleX(-1); }
         .animate-pop { animation: pop 1s ease; }
@@ -91,7 +112,7 @@ export default function StepTwo({ className }: Props) {
           </div>
         ) : canPhoto ? (
           <CameraBooth
-            frame={frame || "2x1"} // ✅ 스토어에서 가져온 프레임 적용 (방어 코드로 기본값 추가)
+            frame={frame || "2x1"}
             imageCount={Object.keys(images).length}
             onCapture={handleCapture}
             onResetRequest={handleResetImages}
