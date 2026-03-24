@@ -30,6 +30,19 @@ export default function CameraBooth({
   const shutterSoundRef = useRef<HTMLAudioElement>(null);
   const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // ✅ 1. 무한 루프 방지용 Ref: 항상 최신 이미지 갯수를 추적합니다.
+  const imageCountRef = useRef(imageCount);
+
+  useEffect(() => {
+    imageCountRef.current = imageCount;
+    // 6장이 꽉 차면 진행 중이던 타이머를 강제 종료합니다.
+    if (imageCount >= 6) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsAutoShooting(false);
+      if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+    }
+  }, [imageCount]);
+
   useEffect(() => {
     let stream: MediaStream | null = null;
 
@@ -95,8 +108,16 @@ export default function CameraBooth({
     onCapture(image);
   }, [isMirror, isHorizontal, onCapture]);
 
+  // ✅ 2. 최신의 startAutoShot 함수를 호출하기 위한 Ref
+  const startAutoShotRef = useRef<(() => void) | null>(null);
+
   const startAutoShot = useCallback(() => {
-    if (imageCount >= 6) return;
+    // 💥 현재 진짜 최신 갯수를 확인 (6장이면 실행 거부)
+    if (imageCountRef.current >= 6) {
+      setIsAutoShooting(false);
+      return;
+    }
+
     setIsAutoShooting(true);
     setCountdown(5);
 
@@ -105,19 +126,33 @@ export default function CameraBooth({
         if (prev <= 1) {
           if (countdownTimerRef.current)
             clearInterval(countdownTimerRef.current);
+
           captureAndSave();
-          // eslint-disable-next-line react-hooks/immutability
-          setTimeout(() => startAutoShot(), 1000);
+
+          // 💥 1초 뒤에 다음 촬영 예약할 때도 최신 갯수 확인!
+          setTimeout(() => {
+            if (imageCountRef.current < 6) {
+              startAutoShotRef.current?.();
+            } else {
+              setIsAutoShooting(false);
+            }
+          }, 1000);
+
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
-  }, [imageCount, captureAndSave]);
+  }, [captureAndSave]);
+
+  // startAutoShot 함수가 바뀔 때마다 Ref를 최신화
+  useEffect(() => {
+    startAutoShotRef.current = startAutoShot;
+  }, [startAutoShot]);
 
   const handleActionClick = () => {
     if (isPhotoTaken) setIsPhotoTaken(false);
-    else if (!isAutoShooting) startAutoShot();
+    else if (!isAutoShooting && imageCount < 6) startAutoShot();
   };
 
   return (
@@ -165,7 +200,6 @@ export default function CameraBooth({
       <div
         className={`relative flex items-center ${isHorizontal ? "w-[100px] flex-col justify-start pt-4" : "h-[100px] w-full justify-start pl-4"}`}
       >
-        {/* 보조 아이콘 영역 (가운데 버튼과 간섭하지 않게 묶어둠) */}
         <div
           className={`flex ${isHorizontal ? "flex-col" : "flex-row"} gap-4 z-10`}
         >
@@ -181,7 +215,6 @@ export default function CameraBooth({
           )}
         </div>
 
-        {/* 찰칵 버튼 영역 (absolute로 무조건 부모의 정중앙에 띄움) */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex justify-center items-center">
           {imageCount === 6 ? (
             <button
@@ -192,8 +225,9 @@ export default function CameraBooth({
             </button>
           ) : (
             <button
-              className="w-[60px] h-[60px] rounded-full bg-white border border-black flex items-center justify-center"
+              className={`w-[60px] h-[60px] rounded-full bg-white border border-black flex items-center justify-center ${isAutoShooting ? "opacity-50 cursor-not-allowed" : ""}`}
               onClick={handleActionClick}
+              disabled={isAutoShooting}
             >
               <div className="w-[50px] h-[50px] rounded-full border-2 border-gray-400 flex items-center justify-center">
                 {isPhotoTaken && <Plus className="w-5 h-5 text-black" />}
