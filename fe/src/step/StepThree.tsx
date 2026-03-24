@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { CheckCircle } from "lucide-react";
 import { useStore } from "@store/useStore"; // ✅ 실제 스토어 경로로 맞춰주세요
 import BasicFrame from "@components/BasicFrame"; // ✅ 컴포넌트 경로 확인

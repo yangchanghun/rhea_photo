@@ -195,7 +195,7 @@ export default function StepFour({ className }: Props) {
 
   // --- [객체 생성] ---
   const createObj = (
-    type: "sticker",
+    _type: "sticker",
     left: number,
     top: number,
     stickerId?: string,
