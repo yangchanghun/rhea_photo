@@ -17,6 +17,8 @@ interface Store {
 
   canNext: boolean;
 
+  frameImg: string | null; // 🔥 새로 추가 (꾸미기 완성본 이미지)
+
   // actions
   setFrame: (frame: string | null) => void;
   setTable: (table: TableType) => void;
@@ -26,6 +28,8 @@ interface Store {
   setTargetList: (targetList: Record<number, string>) => void; // 🔥 추가
   setNext: (val: boolean) => void;
   resetState: () => void;
+
+  setFrameImg: (img: string | null) => void; // 🔥 액션 추가
 }
 
 export const useStore = create<Store>((set) => ({
@@ -36,8 +40,9 @@ export const useStore = create<Store>((set) => ({
   targets: {}, // 🔥 초기화
   targetList: {}, // 🔥 초기화
   canNext: false,
-
+  frameImg: null,
   // actions
+  setFrameImg: (img) => set({ frameImg: img }),
   setFrame: (frame) => set({ frame }),
   setTable: (table) => set({ table }),
   setImages: (images) => set({ images }),
@@ -53,5 +58,6 @@ export const useStore = create<Store>((set) => ({
       targets: {}, // 🔥 초기화
       targetList: {}, // 🔥 초기화
       canNext: false,
+      frameImg: null, // 초기화 시 같이 비워주기
     }),
 }));

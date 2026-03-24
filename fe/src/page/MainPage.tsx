@@ -9,6 +9,9 @@ import FooterBar from "@components/FooterBar";
 import StepOne from "@step/StepOne";
 import StepTwo from "@step/StepTwo";
 import StepThree from "@step/StepThree";
+import StepFour from "@step/StepFour";
+import StepFive from "@step/StepFive";
+import StepResult from "@step/stepResult";
 
 export default function MainPage() {
   const navigate = useNavigate();
@@ -79,6 +82,12 @@ export default function MainPage() {
         return <StepTwo className={baseClass} />;
       case 2:
         return <StepThree className={baseClass} />;
+      case 3:
+        return <StepFour className={baseClass} />;
+      case 4:
+        return <StepFive className={baseClass} />;
+      case 5:
+        return <StepResult className={baseClass} />;
     }
   };
 
