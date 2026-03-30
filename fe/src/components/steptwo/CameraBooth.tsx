@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ArrowLeftRight, Trash2, Plus, RotateCcw } from "lucide-react";
+import { ArrowLeftRight, Trash2, Plus } from "lucide-react";
 
 interface CameraBoothProps {
   imageCount: number;
@@ -11,7 +11,6 @@ interface CameraBoothProps {
 export default function CameraBooth({
   imageCount,
   onCapture,
-  onResetRequest,
   frame,
 }: CameraBoothProps) {
   const rows = parseInt(frame.split("x")[0], 10);
@@ -216,14 +215,7 @@ export default function CameraBooth({
         </div>
 
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex justify-center items-center">
-          {imageCount === 6 ? (
-            <button
-              className="w-[60px] h-[60px] rounded-full bg-white flex items-center justify-center text-2xl"
-              onClick={onResetRequest}
-            >
-              <RotateCcw className="text-black" />
-            </button>
-          ) : (
+          {imageCount < 6 && (
             <button
               className={`w-[60px] h-[60px] rounded-full bg-white border border-black flex items-center justify-center ${isAutoShooting ? "opacity-50 cursor-not-allowed" : ""}`}
               onClick={handleActionClick}

@@ -36,8 +36,6 @@ export default function StepFive({ className }: Props) {
   const isHorizontal = cols <= rows;
   const cWidth = isHorizontal ? 600 : 450;
   const cHeight = isHorizontal ? 450 : 600;
-  const fWidth = isHorizontal ? 100 : 75;
-  const fHeight = isHorizontal ? 75 : 100;
 
   const totalImgs = Object.keys(targets).length || 1;
   const [currImg, setCurrImg] = useState<number>(1);
@@ -139,6 +137,11 @@ export default function StepFive({ className }: Props) {
       ),
     }));
   }, [currImg, targets, setTargets]);
+
+  const saveWorkRef = useRef(saveWork);
+  useEffect(() => {
+    saveWorkRef.current = saveWork;
+  }, [saveWork]);
 
   // --- [사진 캔버스 로드 및 상태 복구] ---
   const loadImgCanvas = useCallback(
@@ -258,21 +261,23 @@ export default function StepFive({ className }: Props) {
           canvas.setActiveObject(img);
           canvas.renderAll();
           setTargetSticker(null);
-          saveWork();
+          // ❌ 기존: saveWork();
+          saveWorkRef.current(); // ✅ 수정
         });
       }
     });
 
     canvas.on("mouse:up", (e) => {
-      if (isModeRef.current === "draw") saveWork();
+      if (isModeRef.current === "draw")
+        saveWorkRef.current(); // ✅ 수정
       else if (e.target) {
         e.target.opacity = 1;
         canvas.renderAll();
       }
     });
 
-    canvas.on("selection:cleared", () => saveWork());
-
+    // canvas.on("selection:cleared", () => saveWork());
+    canvas.on("selection:cleared", () => saveWorkRef.current()); // ✅ 수정
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
         e.key.toUpperCase() === "DELETE" ||
@@ -282,7 +287,8 @@ export default function StepFive({ className }: Props) {
         if (targetObj) {
           canvas.remove(targetObj);
           canvas.renderAll();
-          saveWork();
+          // ❌ 기존: saveWork();
+          saveWorkRef.current(); // ✅ 수정
         }
       }
     };
@@ -448,21 +454,18 @@ export default function StepFive({ className }: Props) {
                     className={`flex flex-col items-center p-2 border rounded-lg cursor-pointer transition ${targetFilter === filter ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200" : "bg-white hover:bg-gray-100"}`}
                     onClick={() => handleFilterSelect(filter)}
                   >
-                    <canvas
-                      ref={(el) => {
-                        if (el && !filterCanvases.current[filter]) {
-                          filterCanvases.current[filter] = new fabric.Canvas(
-                            el,
-                            {
-                              width: fWidth,
-                              height: fHeight,
-                              selection: false,
-                            },
-                          );
-                        }
+                    {/* ✅ 1. 기존 <canvas> 전체 삭제 후 <img> 태그 삽입 */}
+                    <img
+                      src="/img/filter-sample.jpg" // 지정된 경로
+                      alt={`${filter} sample`}
+                      className="mb-2 border bg-gray-200 object-cover rounded-md"
+                      style={{
+                        // 이전 코드에서 정의한 반응형 크기 유지
+                        width: isHorizontal ? 100 : 75,
+                        height: isHorizontal ? 75 : 100,
                       }}
-                      className="mb-2 border bg-gray-200"
                     />
+
                     <span className="text-sm font-semibold capitalize">
                       {filter}
                     </span>
