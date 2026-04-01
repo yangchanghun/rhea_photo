@@ -61,3 +61,5 @@ export const useStore = create<Store>((set) => ({
       frameImg: null, // 초기화 시 같이 비워주기
     }),
 }));
+
+// const {restore} = useStore()

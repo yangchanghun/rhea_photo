@@ -32,9 +32,7 @@ export default function Home() {
         <div className="text-[60px] font-bold">레아포토</div>
 
         {/* 서브타이틀 */}
-        <div className="text-[25px] mb-10">
-          무제한으로 원하는 모습을 찍고 꾸미세요!
-        </div>
+        <div className="text-[25px] mb-10"></div>
 
         {/* 클릭 안내 */}
         <span className="text-lg opacity-80 animate-pulse">Click to Start</span>
