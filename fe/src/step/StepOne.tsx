@@ -63,11 +63,11 @@ export default function StepOne({ className }: Props) {
           onClick={() => selectFrame("1x2")}
           vertical
         />
-        <FrameItem
-          active={targetFrame === "2x1"}
-          img="/frame/2_1.png"
-          onClick={() => selectFrame("2x1")}
-        />
+        {/* <FrameItem */}
+        {/* active={targetFrame === "2x1"} */}
+        {/* img="/frame/2_1.png" */}
+        {/* onClick={() => selectFrame("2x1")} */}
+        {/* /> */}
       </Section>
 
       {/* 3 Cuts */}
@@ -78,11 +78,11 @@ export default function StepOne({ className }: Props) {
           onClick={() => selectFrame("1x3")}
           vertical
         />
-        <FrameItem
+        {/* <FrameItem
           active={targetFrame === "3x1"}
           img="/frame/3_1.png"
           onClick={() => selectFrame("3x1")}
-        />
+        /> */}
       </Section>
 
       {/* 4 Cuts */}
@@ -98,11 +98,11 @@ export default function StepOne({ className }: Props) {
           img="/frame/2_2.png"
           onClick={() => selectFrame("2x2")}
         />
-        <FrameItem
+        {/* <FrameItem
           active={targetFrame === "4x1"}
           img="/frame/4_1.png"
           onClick={() => selectFrame("4x1")}
-        />
+        /> */}
       </Section>
 
       {/* 6 Cuts */}
@@ -113,11 +113,11 @@ export default function StepOne({ className }: Props) {
           onClick={() => selectFrame("2x3")}
           vertical
         />
-        <FrameItem
+        {/* <FrameItem
           active={targetFrame === "3x2"}
           img="/frame/3_2.png"
           onClick={() => selectFrame("3x2")}
-        />
+        /> */}
       </Section>
     </div>
   );

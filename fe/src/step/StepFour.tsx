@@ -251,6 +251,28 @@ export default function StepFour({ className }: Props) {
     saveWork();
   };
 
+  const handleBackBg = () => {
+    const canvas = fabricCanvas.current;
+    if (!canvas) return;
+
+    // 선택 상태 해제
+    canvas.discardActiveObject();
+
+    // 캔버스 위 스티커 전부 제거
+    canvas.getObjects().forEach((obj) => {
+      canvas.remove(obj);
+    });
+
+    // 배경 초기화
+    setTargetColor("#FFF");
+    setTargetPattern(null);
+    setTargetSticker(null);
+
+    canvas.backgroundColor = "#FFF";
+    canvas.renderAll();
+    saveWork();
+  };
+
   const handleSelectPattern = (patternId: string) => {
     const canvas = fabricCanvas.current;
     const imgElement = patternRefs.current[patternId];
@@ -348,7 +370,14 @@ export default function StepFour({ className }: Props) {
               <canvas ref={canvasRef} />
             </div>
           </div>
-
+          <button
+            className="px-6 py-2 bg-blue-500 text-white font-bold rounded-lg shadow hover:bg-blue-600 transition"
+            onClick={() => {
+              handleBackBg();
+            }}
+          >
+            초 기 화
+          </button>
           {isWork && (
             <div className="text-center font-bold text-gray-700">
               Delete 키로 스티커를 지울 수 있습니다.

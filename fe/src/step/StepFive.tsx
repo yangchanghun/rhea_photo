@@ -27,7 +27,7 @@ const WIDTH_STEPS = [7, 10, 13, 16, 19];
 
 export default function StepFive({ className }: Props) {
   const { frame, targets, setTargets } = useStore();
-
+  const originalTargetsRef = useRef<Record<number, string>>({});
   const [canvasJsons, setCanvasJsons] = useState<Record<number, string>>({});
 
   const cols = parseInt(frame?.split("x")[0] || "1");
@@ -54,7 +54,16 @@ export default function StepFive({ className }: Props) {
   const targetStickerRef = useRef(targetSticker);
   const lineColorRef = useRef(lineColor);
   const lineWidthRef = useRef(lineWidth);
+  useEffect(() => {
+    Object.entries(targets).forEach(([key, value]) => {
+      const index = Number(key);
 
+      // 원본이 아직 없을 때만 저장
+      if (!originalTargetsRef.current[index] && value) {
+        originalTargetsRef.current[index] = value;
+      }
+    });
+  }, [targets]);
   useEffect(() => {
     isModeRef.current = isMode;
   }, [isMode]);
@@ -179,7 +188,7 @@ export default function StepFive({ className }: Props) {
           syncCanvasState(); // JSON 불러온 후 모드 복구
         });
       } else {
-        const rawImgUrl = targets[index];
+        const rawImgUrl = originalTargetsRef.current[index];
         if (!rawImgUrl) return;
 
         fabric.Image.fromURL(rawImgUrl, (bgImg) => {
@@ -333,7 +342,8 @@ export default function StepFive({ className }: Props) {
     if (!canvas) return;
 
     setTargetFilter(filterName);
-    const rawImgUrl = targets[currImg];
+
+    const rawImgUrl = originalTargetsRef.current[currImg];
     if (!rawImgUrl) return;
 
     fabric.Image.fromURL(rawImgUrl, (bgImg) => {
@@ -344,14 +354,69 @@ export default function StepFive({ className }: Props) {
           bgImg.applyFilters();
         }
       }
+
       canvas.setBackgroundImage(bgImg, canvas.renderAll.bind(canvas), {
         scaleX: canvas.width! / (bgImg.width || 1),
         scaleY: canvas.height! / (bgImg.height || 1),
       });
+
       saveWork();
     });
   };
+  const handleResetCurrent = () => {
+    const canvas = fabricCanvas.current;
+    if (!canvas) return;
 
+    const rawImgUrl = originalTargetsRef.current[currImg];
+    if (!rawImgUrl) return;
+
+    canvas.discardActiveObject();
+    canvas.clear();
+
+    // 현재 사진의 편집 상태 제거
+    setCanvasJsons((prev) => {
+      const next = { ...prev };
+      delete next[currImg];
+      return next;
+    });
+
+    // UI 상태 초기화
+    setTargetFilter("normal");
+    setTargetSticker(null);
+    setIsMode("filter");
+    setLineColor("#000000");
+    setLineWidth(10);
+    setTargetLineWidth("2");
+
+    fabric.Image.fromURL(rawImgUrl, (bgImg) => {
+      canvas.setBackgroundImage(bgImg, canvas.renderAll.bind(canvas), {
+        scaleX: canvas.width! / (bgImg.width || 1),
+        scaleY: canvas.height! / (bgImg.height || 1),
+      });
+
+      canvas.backgroundColor = "#FFFFFF";
+      canvas.isDrawingMode = false;
+
+      if (canvas.freeDrawingBrush) {
+        canvas.freeDrawingBrush.color = "#000000";
+        canvas.freeDrawingBrush.width = 10;
+      }
+
+      canvas.getObjects().forEach((obj) => {
+        obj.selectable = true;
+        obj.evented = true;
+      });
+
+      canvas.renderAll();
+
+      if (setTargets) {
+        setTargets({
+          ...targets,
+          [currImg]: rawImgUrl,
+        });
+      }
+    });
+  };
   const handleClearPath = () => {
     const canvas = fabricCanvas.current;
     if (!canvas) return;
@@ -384,6 +449,12 @@ export default function StepFive({ className }: Props) {
               <AlertCircle size={18} />
               <small>스티커, 그리기 등을 자유롭게 꾸며보세요!</small>
             </div>
+            <button
+              className="px-6 py-2 bg-gray-500 text-white font-bold rounded-lg shadow hover:bg-gray-600 transition"
+              onClick={handleResetCurrent}
+            >
+              초기화
+            </button>
             <button
               className="px-6 py-2 bg-blue-500 text-white font-bold rounded-lg shadow hover:bg-blue-600 transition"
               onClick={() => {

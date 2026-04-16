@@ -21,8 +21,8 @@ interface Props {
 // 📐 프레임 사이즈 매핑 객체 (가로/세로 크기)
 const FRAME_SIZES: Record<string, { w: number; h: number }> = {
   "1x1": { w: 400, h: 350 },
-  "1x2": { w: 320, h: 520 },
-  "1x3": { w: 220, h: 525 },
+  "1x2": { w: 320, h: 480 },
+  "1x3": { w: 220, h: 510 },
   "1x4": { w: 180, h: 560 },
   "2x1": { w: 520, h: 320 },
   "2x2": { w: 620, h: 520 },
@@ -70,18 +70,45 @@ export default function StepResult({ className }: Props) {
         const printWindow = window.open("", "_blank");
         if (printWindow) {
           printWindow.document.write(`
-            <html>
-              <head>
-                <title>인생네컷 인쇄</title>
-                <style>
-                  body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
-                  img { max-width: 100%; max-height: 100%; }
-                </style>
-              </head>
-              <body>
-                <img src="${base64}" onload="window.print(); window.close();" />
-              </body>
-            </html>
+    <html>
+      <head>
+        <title>인생네컷 인쇄</title>
+        <style>
+          @page {
+            size: A4 portrait;
+            margin: 0;
+          }
+
+          html, body {
+            margin: 0;
+            padding: 0;
+            width: 210mm;
+            height: 297mm;
+            overflow: hidden;
+            background: #fff;
+          }
+
+          body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+
+          img {
+            display: block;
+            width: auto;
+            max-width: 190mm;
+            max-height: 270mm;
+            object-fit: contain;
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+        </style>
+      </head>
+      <body>
+        <img src="${base64}" onload="window.print(); window.close();" />
+      </body>
+    </html>
           `);
           printWindow.document.close();
         }
