@@ -21,7 +21,7 @@ interface Props {
 // 📐 프레임 사이즈 매핑 객체 (가로/세로 크기)
 const FRAME_SIZES: Record<string, { w: number; h: number }> = {
   "1x1": { w: 400, h: 350 },
-  "1x2": { w: 320, h: 450 },
+  "1x2": { w: 320, h: 505 },
   "1x3": { w: 220, h: 510 },
   "1x4": { w: 180, h: 560 },
   "2x1": { w: 520, h: 320 },
