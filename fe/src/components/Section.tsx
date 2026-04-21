@@ -23,7 +23,7 @@ export default function Section({ title, children }: SectionProps) {
         >
           <option value="">선택</option>
           <option value="505">24,32인치</option>
-          <option value="485">테블릿에듀</option>
+          <option value="465">테블릿에듀</option>
         </select>
       </div>
 
