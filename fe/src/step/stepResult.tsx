@@ -18,25 +18,27 @@ interface Props {
   className?: string;
 }
 
-// 📐 프레임 사이즈 매핑 객체 (가로/세로 크기)
-const FRAME_SIZES: Record<string, { w: number; h: number }> = {
-  "1x1": { w: 400, h: 350 },
-  "1x2": { w: 320, h: 505 },
-  "1x3": { w: 220, h: 510 },
-  "1x4": { w: 180, h: 560 },
-  "2x1": { w: 520, h: 320 },
-  "2x2": { w: 620, h: 520 },
-  "2x3": { w: 420, h: 525 },
-  "3x1": { w: 525, h: 220 },
-  "3x2": { w: 525, h: 420 },
-  "4x1": { w: 560, h: 180 },
-};
-
 export default function StepResult({ className }: Props) {
+  const sizeColumn = useStore((state) => state.size);
+  // 📐 프레임 사이즈 매핑 객체 (가로/세로 크기)
+  const FRAME_SIZES: Record<string, { w: number; h: number }> = {
+    "1x1": { w: 400, h: sizeColumn },
+    "1x2": { w: 320, h: sizeColumn },
+    "1x3": { w: 220, h: sizeColumn },
+    "1x4": { w: 180, h: sizeColumn },
+    "2x1": { w: 520, h: sizeColumn },
+    "2x2": { w: 620, h: sizeColumn },
+    "2x3": { w: 420, h: sizeColumn },
+    "3x1": { w: 525, h: sizeColumn },
+    "3x2": { w: 525, h: sizeColumn },
+    "4x1": { w: 560, h: sizeColumn },
+  };
+
   const { table, resetState } = useStore();
   const navigate = useNavigate();
   const resultRef = useRef<HTMLDivElement>(null);
 
+  // const setSize = useStore((state) => state.setSize);
   const rows = table?.rows || 2;
   const columns = table?.columns || 1;
   const frameKey = `${columns}x${rows}`;

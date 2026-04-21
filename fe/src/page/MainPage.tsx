@@ -27,13 +27,17 @@ export default function MainPage() {
     "이번에는 사진을 꾸며볼까요",
     "마음에 드시나요?",
   ];
-
+  const size = useStore((state) => state.size);
   // 🔥 next
   const nextStep = () => {
     const state = useStore.getState();
 
     // ✅ 2. alert() 대신 toast.error()를 사용해 에러 메시지를 띄웁니다!
     // 1단계 검증
+    if (size === 1) {
+      toast.error("기종을 선택해주세요.");
+      return;
+    }
     if (step === 0 && !state.frame) {
       toast.error("액자를 골라주세요.");
       return;
